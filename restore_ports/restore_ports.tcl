@@ -10,6 +10,8 @@ if /usr/bin/which -s port-tclsh; then exec port-tclsh "$0" -i `which port-tclsh`
 # Handle conflicting ports somehow
 # Once "good enough", integrate into port
 
+# First need to install xz and p7zip.
+
 
 set MY_VERSION 0.1
 
@@ -102,6 +104,7 @@ proc sort_ports {portList} {
     set operationList [list]
     while {[llength $newList] > 0} {
         set oldLen [llength $newList]
+        #ui_msg "list: $newList"
         foreach port $newList {
             foreach {active name variants} $port break
             # ensure active versions are installed after inactive versions,
@@ -114,6 +117,7 @@ proc sort_ports {portList} {
             foreach dep $port_deps(${name},${variants}) {
                 # XXX maybe check dep is active here?
                 if {[info exists port_installed($dep)] && $port_installed($dep) == 0} {
+                    #ui_msg "Dependency $dep not installed for $name"
                     set installable 0
                     break
                 }
@@ -149,6 +153,8 @@ proc install_ports {operationList} {
             set install_target activate
         }
 
+        ui_msg "Executing $install_target for $name"
+        
         if {[catch {set res [mportlookup $name]} result]} {
             global errorInfo
             ui_debug "$errorInfo"
