@@ -153,7 +153,7 @@ proc install_ports {operationList} {
             set install_target activate
         }
 
-        ui_msg "Executing $install_target for $name"
+        ui_msg "--->  Executing $install_target for $name"
         
         if {[catch {set res [mportlookup $name]} result]} {
             global errorInfo
@@ -175,11 +175,14 @@ proc install_ports {operationList} {
             puts stderr "$errorInfo"
             return -code error "Unable to open port '$name': $result"
         }
-        if {[catch {set result [mportexec $workername $install_target]} result]} {
+        if {[catch {mportexec $workername $install_target} result]} {
             global errorInfo
             mportclose $workername
             ui_msg "$errorInfo"
-            return -code error "Unable to execute target 'install' for port '$name': $result"
+            return -code error "Unable to execute target '$install_target' for port '$name': $result"
+        } elseif {$result != 0} {
+            mportclose $workername
+            return -code error "Unable to execute target '$install_target' for port '$name'"
         } else {
             mportclose $workername
         }
